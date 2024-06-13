@@ -87,16 +87,67 @@ networks:
 
 Running `docker compose up` will start both containers, with the Jupyter notebook accessible and configured with the Redis library.
 
+### Step 5: Automate Docker Image Publishing with GitHub Actions
+
+To automate the process of building and pushing your custom Jupyter image to Docker Hub, you need to create a GitHub Actions workflow file. Follow these steps to set up the automation:
+
+1. Create a file named `docker-publish.yml` in the `.github/workflows/` directory.
+
+2. Add the following configuration to the `docker-publish.yml` file:
+
+```yaml
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: heispv
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: heispv/jupyter-redis:latest
+```
+
+This workflow is triggered by a push to the `master` branch. It checks out the repository, logs in to Docker Hub using your credentials stored in GitHub Secrets, and then builds and pushes the Docker image to your Docker Hub repository.
+
 ## Directory Structure
 
 Here's the layout of the project directory:
 
 ```
 jupyter-redis-compose/
+│
+├── .github/
+│   └── workflows/
+│       └── docker-publish.yml
+│
+├── .gitignore
+│
 ├── docker-compose.yml
-├── docker/
-│   └── Dockerfile
+│
+├── Dockerfile
+│
 └── work/
 ```
 
 **Note:** The `work` directory is listed in the `.gitignore` file to prevent it from being tracked by Git.
+
+
