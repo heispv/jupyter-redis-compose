@@ -1,0 +1,30 @@
+services:
+  redis:
+    image: redis
+    container_name: my_redis
+    volumes:
+      - ~/review:/data
+    networks:
+      - bdp2-net
+    user: "1000"
+    command: redis-server
+
+  jupyter:
+    build: .
+    container_name: my_jupyter
+    volumes:
+      - ~/review:/home/jovyan
+    ports:
+      - "80:8888"
+    networks:
+      - bdp2-net
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=admin
+      - CHOWN_HOME=yes
+      - CHOWN_HOME_OPTS=-R
+    user: root
+
+networks:
+  bdp2-net:
+    driver: bridge
